@@ -1,18 +1,18 @@
 import cors from "cors";
 import { Router } from "express";
 import { z } from "zod";
-import { DBConnection } from "../../interfaces/DBConnection";
 import { UserController } from "../controllers/userController";
 import { UserGateway } from "../gateways/userGateway";
 import { CreateUserValidator } from "../interfaces/dtos";
 import { UserJsonPresenter } from "../presenters/userPresenter";
 import { JWTToken } from "../../api/middlewares/jwtMiddleware";
+import { UserRepository } from "../../repositories/UserRepository";
 
-export const userRoutes = (dbConnection: DBConnection<any>): Router => {
+export const userRoutes = (): Router => {
   const router = Router();
   router.use(cors({ origin: "*" }));
 
-  const userRepository = new UserGateway(dbConnection);
+  const userRepository = new UserGateway(new UserRepository());
   const userPresenter = new UserJsonPresenter();
 
   /**

@@ -1,24 +1,24 @@
-import { DBConnection } from "../../interfaces/DBConnection";
 import { User } from "../entities/user";
-import { UserRepository } from "../interfaces/repositories";
+import { UserRepository } from "../../repositories/UserRepository";
+import { UserRepository as IUserRepositoryInterface } from "../interfaces/repositories";
 
-export class UserGateway implements UserRepository {
-  private dbConnection: DBConnection<User>;
-  private tableName = "users";
+export class UserGateway implements IUserRepositoryInterface {
+  private repository: UserRepository;
 
-  constructor(dbConnection: DBConnection<any>) {
-    this.dbConnection = dbConnection;
+  constructor(repository: UserRepository) {
+    this.repository = repository;
   }
 
   async findByCPF(cpf: string): Promise<User | null> {
     try {
-      const userData = await this.dbConnection.findOne(this.tableName, { cpf });
+      const userData = await this.repository.findByCPF(cpf);
+      if (!userData) return null;
 
       return User.create(
-        userData?.id,
-        userData?.name,
-        userData?.cpf,
-        userData?.email
+        userData.id.toString(),
+        userData.name,
+        userData.cpf,
+        userData.email
       );
     } catch (error) {
       throw error;
@@ -27,16 +27,13 @@ export class UserGateway implements UserRepository {
 
   async create(userData: { name: string; cpf: string; email: string }) {
     try {
-      const newUserData = await this.dbConnection.save(
-        this.tableName,
-        userData
-      );
+      const newUser = await this.repository.create(userData);
 
       return User.create(
-        newUserData?.id,
-        newUserData?.name,
-        newUserData?.cpf,
-        newUserData?.email
+        newUser.id.toString(),
+        newUser.name,
+        newUser.cpf,
+        newUser.email
       );
     } catch (error) {
       throw error;
